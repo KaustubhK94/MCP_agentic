@@ -34,60 +34,86 @@ def search_flights(
     start_date: str,
     end_date: str | None = None,
     currency: str = "USD",
-) -> list:
+    adults: int = 1,
+    travel_class: str = "ECONOMY",
+) -> dict:
     """
-    Search available flights.
+    Search flights using Google Flights.
 
     Arguments
     ---------
     origin
         Three-letter IATA airport code.
-
     destination
         Three-letter IATA airport code.
-
     start_date
         Departure date in YYYY-MM-DD format.
-
     end_date
         Optional return date in YYYY-MM-DD format.
-
     currency
-        Currency code used for pricing.
+        Currency code (USD, INR, EUR, etc.)
+
+    adults
+        Number of adult passengers.
+    travel_class
+        Cabin class.
+
+        One of:
+        - ECONOMY
+        - PREMIUM_ECONOMY
+        - BUSINESS
+        - FIRST
 
     Notes
     -----
     • This tool ONLY accepts airport IATA codes.
 
     • If the user specifies a city with a clear primary airport,
-      you may infer the airport.
+      infer the airport automatically.
 
       Examples:
-      - Mumbai -> BOM
-      - Paris -> CDG
-      - Singapore -> SIN
+      - Mumbai → BOM
+      - Paris → CDG
+      - Singapore → SIN
 
     • If multiple airports are equally reasonable,
-      ask the user which airport they prefer.
+      ask the user which airport they mean.
 
       Examples:
       - London
       - Osaka
       - New York
 
+    • Use a round-trip search whenever the user provides
+      a return date.
+
     Returns
     -------
-    Flight offers including airline, price and itinerary.
-    """
-    print("Flight tool invoked")
-    return _search_flights(
-        origin,
-        destination,
-        start_date,
-        end_date,
-        currency,
-    )
+    Dictionary containing:
 
+    - best_flights
+    - other_flights
+
+    Each flight includes:
+
+    - price
+    - duration
+    - carbon emissions
+    - layovers
+    - flight legs
+    """
+
+    print("Flight tool invoked")
+
+    return _search_flights(
+        origin=origin,
+        destination=destination,
+        start_date=start_date,
+        end_date=end_date,
+        currency=currency,
+        adults=adults,
+        travel_class=travel_class,
+    )
 
 # =====================================================================
 # Hotels

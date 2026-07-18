@@ -1,67 +1,83 @@
-# # tools/flights.py
-
-
 import os
-from typing import Optional, List, Dict
-from amadeus import Client
-from utils.flight_formatter import format_segments
+from typing import Optional, Dict, Any
 
+import serpapi
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Load environment variables (or pass via settings)
-AMADEUS_CLIENT_ID = os.getenv("AMADEUS_CLIENT_ID")
-AMADEUS_CLIENT_SECRET = os.getenv("AMADEUS_CLIENT_SECRET")
+from utils.flight_formatter import _normalize_flight
 
-amadeus = Client(
-    client_id=AMADEUS_CLIENT_ID,
-    client_secret=AMADEUS_CLIENT_SECRET
-)
+
+SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
+
+if not SERPAPI_API_KEY:
+    raise ValueError("SERPAPI_API_KEY not found in environment variables.")
+
+client = serpapi.Client(api_key=SERPAPI_API_KEY)
+
+
+TRAVEL_CLASS = {
+    "ECONOMY": 1,
+    "PREMIUM_ECONOMY": 2,
+    "BUSINESS": 3,
+    "FIRST": 4,
+}
+
+
 
 def search_flights(
     origin: str,
     destination: str,
     start_date: str,
     end_date: Optional[str] = None,
-    currency: str = "USD"
-) -> List[Dict]:
+    currency: str = "USD",
+    adults: int = 1,
+    travel_class: str = "ECONOMY",
+) -> Dict[str, Any]:
     """
-    Search for flights using Amadeus API.
-    Returns a list of flight offers with price, airline, and segment details.
+    Search Google Flights using SerpAPI.
     """
+
+    params = {
+        "engine": "google_flights",
+        "departure_id": origin,
+        "arrival_id": destination,
+        "outbound_date": start_date,
+        "currency": currency,
+        "adults": adults,
+        "travel_class": TRAVEL_CLASS.get(travel_class.upper(), 1),
+    }
+
+    if end_date:
+        params["return_date"] = end_date
+        params["type"] = 1
+    else:
+        params["type"] = 2
+
     try:
-        params = {
-            "originLocationCode": origin,
-            "destinationLocationCode": destination,
-            "departureDate": start_date,
-            "adults": 1,
-            "currencyCode": currency,
-            "max": 1  # Changed from 5 to 1 for testing
-        }
-        if end_date:
-            params["returnDate"] = end_date
 
-        response = amadeus.shopping.flight_offers_search.get(**params)
-        data = response.data
-
-        results = []
-        for offer in data:
-            price = f"{offer['price']['total']} {offer['price']['currency']}"
-            airline = offer["validatingAirlineCodes"][0]
-
-            outbound_legs = format_segments(offer["itineraries"][0]["segments"])
-            return_legs = format_segments(offer["itineraries"][1]["segments"]) if len(
-                offer["itineraries"]) > 1 else []
-
-            results.append({
-                "price": price,
-                "airline": airline,
-                "outbound": outbound_legs,
-                "return": return_legs
-            })
-
-        return results
+        results = client.search(params)
+        return {
+            "best_flights": [
+                _normalize_flight(f)
+                for f in results.get("best_flights", [])],
+            "other_flights": [
+                _normalize_flight(f)
+                for f in results.get("other_flights", [])],}
 
     except Exception as e:
-        return [{"error": str(e)}]
+        return {
+            "error": str(e)}
+
+
+if __name__ == "__main__":
+    import json
+    results = search_flights(
+        origin="BOM",
+        destination="BKK",
+        start_date="2026-08-10",
+        end_date="2026-08-17",
+        currency="USD",)
+
+    print(json.dumps(results, indent=2))

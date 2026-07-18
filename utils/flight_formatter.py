@@ -2,6 +2,9 @@ import time
 import re
 from datetime import datetime, timedelta
 
+from typing import Optional, Dict, Any
+
+
 def format_duration(iso_duration):
     match = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?", iso_duration)
     if not match:
@@ -26,3 +29,33 @@ def format_segments(segments):
         duration = format_duration(seg['duration'])
         legs.append(f"{dep_airport} ({dep_time}) → {arr_airport} ({arr_time}) [{duration}]")
     return legs
+
+
+
+def _normalize_flight(flight: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert a Google Flights result into a consistent schema."""
+
+    legs = []
+
+    for segment in flight.get("flights", []):
+
+        legs.append(
+            {
+                "airline": segment.get("airline"),
+                "flight_number": segment.get("flight_number"),
+                "departure_airport": segment["departure_airport"]["id"],
+                "departure_time": segment["departure_airport"]["time"],
+                "arrival_airport": segment["arrival_airport"]["id"],
+                "arrival_time": segment["arrival_airport"]["time"],
+                "duration": segment.get("duration"),
+                "airplane": segment.get("airplane"),
+            }
+        )
+
+    return {
+        "price": flight.get("price"),
+        "total_duration": flight.get("total_duration"),
+        "carbon_emissions": flight.get("carbon_emissions"),
+        "layovers": flight.get("layovers", []),
+        "legs": legs,
+    }
