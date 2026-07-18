@@ -64,28 +64,6 @@ def search_flights(
         - BUSINESS
         - FIRST
 
-    Notes
-    -----
-    • This tool ONLY accepts airport IATA codes.
-
-    • If the user specifies a city with a clear primary airport,
-      infer the airport automatically.
-
-      Examples:
-      - Mumbai → BOM
-      - Paris → CDG
-      - Singapore → SIN
-
-    • If multiple airports are equally reasonable,
-      ask the user which airport they mean.
-
-      Examples:
-      - London
-      - Osaka
-      - New York
-
-    • Use a round-trip search whenever the user provides
-      a return date.
 
     Returns
     -------
