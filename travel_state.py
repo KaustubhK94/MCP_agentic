@@ -1,8 +1,7 @@
-# travel_state.py
-
+# travle_state.py
 from copy import deepcopy
 from llama_index.core.workflow import Context
-from tool_metadata import TOOL_METADATA
+from tool_metadata import TOOL_METADATA   # direct import, no wrapper
 
 # --------------------------------------------
 #  State helpers
@@ -32,7 +31,7 @@ async def reset_trip(ctx: Context):
     await save_state(ctx, state)
 
 # --------------------------------------------
-#  Default trip structure (stays here)
+#  Default trip (belongs to the state layer)
 # --------------------------------------------
 
 DEFAULT_TRIP = {
@@ -64,38 +63,30 @@ def set_nested_value(obj, path, value):
     current[path[-1]] = value
 
 # --------------------------------------------
-#  Public interface: get tool metadata
-# --------------------------------------------
-
-def get_tool_metadata(tool_name: str):
-    """Return the full metadata dict for a tool, or None if not found."""
-    return TOOL_METADATA.get(tool_name)
-
-# --------------------------------------------
-#  Core functions: update state from tool
+#  Public API – callers only need these two
 # --------------------------------------------
 
 async def update_trip_fields(ctx: Context, tool_name: str, kwargs: dict):
-    """Extract tool arguments and store them in the trip state."""
-    metadata = get_tool_metadata(tool_name)
+    """Extract mapped arguments from the tool call and store them in the trip state."""
+    metadata = TOOL_METADATA.get(tool_name)
     if metadata is None:
         return
 
-    state_mapping = metadata["state_mapping"]
-    if not state_mapping:
+    arg_mapping = metadata["arg_mapping"]
+    if not arg_mapping:
         return
 
     trip = await get_trip(ctx)
 
-    for arg, path in state_mapping.items():
+    for arg, path in arg_mapping.items():
         if arg in kwargs:
             set_nested_value(trip, path, kwargs[arg])
 
     await save_trip(ctx, trip)
 
 async def update_result(ctx: Context, tool_name: str, value):
-    """Store the tool output in the trip's results, using the metadata to find the key."""
-    metadata = get_tool_metadata(tool_name)
+    """Store the tool's output in the trip's results using the configured key."""
+    metadata = TOOL_METADATA.get(tool_name)
     if metadata is None:
         return
 
