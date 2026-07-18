@@ -49,7 +49,7 @@ def search_flights(
     start_date
         Departure date in YYYY-MM-DD format.
     end_date
-        Optional return date in YYYY-MM-DD format.
+        return date in YYYY-MM-DD format.
     currency
         Currency code (USD, INR, EUR, etc.)
 
