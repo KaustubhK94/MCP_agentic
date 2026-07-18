@@ -1,34 +1,35 @@
 # tool_metadata.py
+from types import MappingProxyType
 
-TOOL_METADATA = {
+TOOL_METADATA = MappingProxyType({
     "search_flights": {
-        "state_mapping": {          # tool arg → trip state path
+        "arg_mapping": {   # tool arg → trip state path
             "origin": ("itinerary", "origin", "airport"),
             "destination": ("itinerary", "destination", "airport"),
             "start_date": ("itinerary", "departure"),
             "end_date": ("itinerary", "return"),
         },
-        "result_key": "flights",    # where to store the tool output
+        "result_key": "flights",
     },
     "search_hotels": {
-        "state_mapping": {
+        "arg_mapping": {
             "location": ("itinerary", "destination", "city"),
             "adults": ("travellers", "adults"),
         },
         "result_key": "hotels",
     },
     "fetch_weather": {
-        "state_mapping": {},
+        "arg_mapping": {},
         "result_key": "weather",
     },
     "fetch_sightseeing": {
-        "state_mapping": {},
+        "arg_mapping": {},
         "result_key": "places",
     },
     "convert_currency": {
-        "state_mapping": {
+        "arg_mapping": {
             "to_currency": ("budget", "currency"),
         },
         "result_key": "currency_conversion",
     },
-}
+})
