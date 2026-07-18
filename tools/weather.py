@@ -7,9 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+from config import OPENWEATHER_API_KEY
 
 def fetch_weather(city: str, start_date: str, end_date: str) -> dict:
     """

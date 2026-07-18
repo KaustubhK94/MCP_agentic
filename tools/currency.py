@@ -5,7 +5,6 @@ import requests
 from config import CURRENCY_API_KEY
 
 
-
 def convert_currency(
     amount: float,
     from_currency: str,

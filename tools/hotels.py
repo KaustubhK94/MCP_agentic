@@ -3,10 +3,8 @@
 import requests
 from dotenv import load_dotenv
 import os
+from config import SERPAPI_API_KEY
 
-load_dotenv()
-
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
 
 def search_hotels(
     destination_city: str,

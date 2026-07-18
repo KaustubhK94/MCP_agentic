@@ -20,6 +20,9 @@ def format_time(iso_time):
         return iso_time
 
 def format_segments(segments):
+    """ 
+    FOR AMADEUS FLIGHTS API
+    """
     legs = []
     for seg in segments:
         dep_airport = seg['departure']['iataCode']

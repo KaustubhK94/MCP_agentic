@@ -2,14 +2,11 @@ import os
 from typing import Optional, Dict, Any
 
 import serpapi
-from dotenv import load_dotenv
-
-load_dotenv()
+from config import SERPAPI_API_KEY
 
 from utils.flight_formatter import _normalize_flight
 
 
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
 
 if not SERPAPI_API_KEY:
     raise ValueError("SERPAPI_API_KEY not found in environment variables.")
