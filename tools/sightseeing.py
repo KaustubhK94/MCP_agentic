@@ -6,10 +6,12 @@ import googlemaps
 
 from dotenv import load_dotenv
 import os
-
+import googlemaps  
 
 from config import GOOGLE_MAPS_API_KEY
 
+
+gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
 
 # Daily limit tracking – global variable (request-scoped if orchestrator re‑creates)
 _calls_made = {"places": 0}
