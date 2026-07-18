@@ -67,53 +67,68 @@ async def build_agent() -> FunctionAgent:
         system_prompt=system_prompt,
     )
 
-# --------------------------------------------
-#  Main workflow
-# --------------------------------------------
 
 async def main():
-    # Build agent and context
     agent = await build_agent()
     agent_context = Context(agent)
 
-    # Ensure initial state exists and show it
     await get_trip(agent_context)
     await print_trip_state(agent_context, "INITIAL TRIP")
 
-    # Main interaction loop
     while True:
         user_input = input("\nYou: ")
         if user_input.lower() in {"exit", "quit"}:
             break
 
-        # Run agent
-        handler = agent.run(
-            user_input,
-            ctx=agent_context,
-        )
+        handler = agent.run(user_input, ctx=agent_context)
 
-        # Process stream events
+        # Map call ID → tool kwargs (unique per tool call)
+        pending_calls = {}
+
         async for event in handler.stream_events():
             if isinstance(event, ToolCall):
                 print(f"\n🔧 Calling {event.tool_name}")
                 print(event.tool_kwargs)
-                # Update state from tool arguments
+
+                # Use a unique ID. Try tool_call_id, fallback to id, else generate one.
+                call_id = getattr(event, "tool_call_id", None)
+                if call_id is None:
+                    call_id = getattr(event, "id", None)
+                if call_id is None:
+                    # Fallback: not ideal but works for sequential execution
+                    call_id = f"{event.tool_name}_{id(event)}"
+                pending_calls[call_id] = event.tool_kwargs
+
+                # Update trip state (itinerary)
                 await update_trip_fields(agent_context, event.tool_name, event.tool_kwargs)
 
             elif isinstance(event, ToolCallResult):
                 print(f"\n✅ {event.tool_name}")
                 print(event.tool_output)
-                # Persist the tool result
-                await handle_tool_result(agent_context, event)
 
-        # Wait for final response and show updated state
+                # Retrieve the corresponding query
+                call_id = getattr(event, "tool_call_id", None)
+                if call_id is None:
+                    call_id = getattr(event, "id", None)
+                if call_id is None:
+                    # Fallback: if no ID, we cannot match reliably; use tool_name as fallback (with warning)
+                    call_id = event.tool_name
+                    # If multiple calls to same tool, this will overwrite, but we log a warning.
+                    import warnings
+                    warnings.warn("No unique call ID; using tool_name as fallback. Parallel calls may mix queries.")
+
+                query = pending_calls.pop(call_id, {})
+                if not query:
+                    # If not found, maybe we already popped? Use empty dict.
+                    pass
+
+                # Store the result with its query
+                await update_result(agent_context, event.tool_name, query, event.tool_output)
+
         response = await handler
         await print_trip_state(agent_context, "TRIP STATE")
         print(f"\nAgent: {response}")
 
-# --------------------------------------------
-#  Entry point
-# --------------------------------------------
 
 if __name__ == "__main__":
     asyncio.run(main())
