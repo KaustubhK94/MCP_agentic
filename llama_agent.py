@@ -125,9 +125,7 @@ async def main():
                 #
                 # Update itinerary immediately from tool arguments.
                 #
-                await update_trip_fields(
-                    ctx,
-                    event.tool_name,
+                await update_trip_fields(ctx,event.tool_name,
                     event.tool_kwargs,)
 
             #
@@ -157,18 +155,14 @@ async def main():
                     # Should never happen under sequential execution.
                     #
                     query = {}
-                await update_result(
-                    ctx,
-                    event.tool_name,
-                    query,
-                    event.tool_output,)
+                await update_result(ctx,event.tool_name,
+                    query,event.tool_output,)
         #
         # Final response
         #
         response = await handler
         await print_trip_state(ctx)
         print(f"\nAgent: {response}")
-
 
 # ============================================================
 # Entry Point

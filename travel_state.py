@@ -71,11 +71,9 @@ async def get_trip(ctx: Context):
     Automatically initializes the default trip on first use.
     """
     state = await get_state(ctx)
-
     if "trip" not in state:
         state["trip"] = deepcopy(DEFAULT_TRIP)
         await save_state(ctx, state)
-
     return state["trip"]
 
 
