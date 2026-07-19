@@ -35,7 +35,7 @@ def search_hotels(
     hotels = []
     if "properties" in data:
         # Only take the first hotel for testing
-        for h in data["properties"][:1]:  # Changed to only get 1 result
+        for h in data["properties"]:  # Changed to only get 1 result
             hotels.append({
                 "name": h.get("name"),
                 "price": h.get("rate_per_night", {}).get("lowest"),
