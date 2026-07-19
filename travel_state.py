@@ -7,6 +7,7 @@ from typing import Any
 from llama_index.core.workflow import Context
 
 from tool_metadata import TOOL_METADATA
+from pprint import pprint
 
 # ============================================================
 # Configuration
@@ -146,8 +147,7 @@ def extract_payload(tool_output):
 async def update_trip_fields(
     ctx: Context,
     tool_name: str,
-    kwargs: dict,
-):
+    kwargs: dict,):
     """
     Update itinerary / traveller information using tool arguments.
 
@@ -172,13 +172,10 @@ async def update_result(
     ctx: Context,
     tool_name: str,
     query: dict,
-    tool_output: Any,
-):
+    tool_output: Any,):
     """
     Store a tool execution.
-
     Each result record contains:
-
     - tool
     - timestamp
     - query
@@ -193,6 +190,10 @@ async def update_result(
         return
     trip = await get_trip(ctx)
     payload = extract_payload(tool_output)
+    print("\n===== EXTRACTED PAYLOAD =====")
+    pprint(payload)
+    print(type(payload))
+    print("=============================\n")
     history = trip["results"].setdefault(result_key, [])
     history.append(
         {
