@@ -52,12 +52,10 @@ async def build_agent() -> FunctionAgent:
     Build the MCP-backed travel planning agent.
     """
     mcp_client = BasicMCPClient("http://127.0.0.1:8000/sse")
-
     tool_spec = McpToolSpec(client=mcp_client)
     tools = await tool_spec.to_tool_list_async()
     print("Loaded tools:")
     print([tool.metadata.name for tool in tools])
-
     return FunctionAgent(
         name="TravelAgent",
         description="Travel planning assistant powered by MCP tools.",
@@ -92,8 +90,7 @@ async def main():
     ctx = Context(agent)
     # initialize state
     await get_trip(ctx)
-    await print_trip_state(
-        ctx,
+    await print_trip_state(ctx,
         "INITIAL TRIP",)
 
     while True:
@@ -114,7 +111,6 @@ async def main():
         #
         pending_queries = deque()
         async for event in handler.stream_events():
-
             #
             # -----------------------------
             # Tool Invocation
@@ -123,7 +119,6 @@ async def main():
             if isinstance(event, ToolCall):
                 print(f"\n🔧 Calling {event.tool_name}")
                 pprint(event.tool_kwargs)
-
                 pending_queries.append({"tool": event.tool_name,
                         "kwargs": event.tool_kwargs,})
 
@@ -148,10 +143,10 @@ async def main():
                 print("\n===== TOOL OUTPUT VARS =====")
                 print(vars(event.tool_output))
                 if hasattr(event.tool_output, "content"):
-                    for i, item in enumerate(event.tool_output.content):
-                        print(f"\n----- Content {i} -----")
+                    for item in event.tool_output.raw_output.content:
                         print(type(item))
-                        print(vars(item))
+                        print(item)
+                        print(item.text)
 
 
                 if pending_queries:
@@ -167,7 +162,6 @@ async def main():
                     event.tool_name,
                     query,
                     event.tool_output,)
-
         #
         # Final response
         #

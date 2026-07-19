@@ -8,6 +8,7 @@ from llama_index.core.workflow import Context
 
 from tool_metadata import TOOL_METADATA
 from pprint import pprint
+import json
 
 # ============================================================
 # Configuration
@@ -110,33 +111,29 @@ def set_nested_value(obj: dict, path: tuple | list, value: Any):
         current = current[key]
     current[path[-1]] = value
 
-import json
-
 
 def extract_payload(tool_output):
     """
-    Extract the payload from a ToolCallResult.
+    Extract the payload from a LlamaIndex ToolOutput.
     """
-    # Preferred:
-
-    if getattr(tool_output, "structuredContent", None) is not None:
-        return tool_output.structuredContent
-    
-    # MCP text response
-    
-    if hasattr(tool_output, "content"):
+    # Unwrap ToolOutput -> CallToolResult
+    raw = getattr(tool_output, "raw_output", tool_output)
+    # Preferred structured payload
+    if getattr(raw, "structuredContent", None) is not None:
+        return raw.structuredContent
+    # MCP content blocks
+    if getattr(raw, "content", None):
         payload = []
-        for item in tool_output.content:
+        for item in raw.content:
             text = getattr(item, "text", None)
             if text is None:
                 continue
             try:
                 payload.append(json.loads(text))
-            except Exception:
+            except json.JSONDecodeError:
                 payload.append(text)
         return payload
-    raise RuntimeError(
-        f"Unknown tool output:\n{tool_output}")
+    return None
 
 
 # ============================================================
@@ -144,13 +141,11 @@ def extract_payload(tool_output):
 # ============================================================
 
 
-async def update_trip_fields(
-    ctx: Context,
+async def update_trip_fields(ctx: Context,
     tool_name: str,
     kwargs: dict,):
     """
     Update itinerary / traveller information using tool arguments.
-
     Only non-None values overwrite existing state.
     """
     metadata = TOOL_METADATA.get(tool_name)
@@ -181,7 +176,6 @@ async def update_result(
     - query
     - result
     """
-
     metadata = TOOL_METADATA.get(tool_name)
     if metadata is None:
         return
@@ -218,7 +212,6 @@ async def get_latest_result(
     result_key: str,):
     """
     Return the latest stored result for a category.
-
     Example:
 
         await get_latest_result(ctx, "flights")
@@ -235,29 +228,23 @@ async def get_results(
     result_key: str,):
     """
     Return the complete history for a result category.
-
     Example:
-
         await get_results(ctx, "hotels")
     """
     trip = await get_trip(ctx)
     return trip["results"].get(result_key, [])
 
 
-async def clear_results(
-    ctx: Context,
-    result_key: str | None = None,
-):
+async def clear_results(ctx: Context,
+    result_key: str | None = None,):
     """
     Clear stored search history.
-
     clear_results(ctx)
         -> clears everything
 
     clear_results(ctx, "flights")
         -> clears only flight searches
     """
-
     trip = await get_trip(ctx)
     if result_key is None:
         for key in trip["results"]:
@@ -265,5 +252,4 @@ async def clear_results(
     else:
         if result_key in trip["results"]:
             trip["results"][result_key] = []
-
     await save_trip(ctx, trip)
