@@ -52,12 +52,10 @@ def search_flights(
         return date in YYYY-MM-DD format.
     currency
         Currency code (USD, INR, EUR, etc.)
-
     adults
         Number of adult passengers.
     travel_class
         Cabin class.
-
         One of:
         - ECONOMY
         - PREMIUM_ECONOMY
@@ -68,12 +66,9 @@ def search_flights(
     Returns
     -------
     Dictionary containing:
-
     - best_flights
     - other_flights
-
     Each flight includes:
-
     - price
     - duration
     - carbon emissions
@@ -151,15 +146,11 @@ def fetch_weather(
 ) -> dict:
     """
     Retrieve weather forecasts.
-
     Arguments
     ---------
     location
-
         Any supported geographic location.
-
         Examples
-
         - city
         - country
         - island
@@ -169,10 +160,9 @@ def fetch_weather(
 
     start_date
         YYYY-MM-DD
-
     end_date
         YYYY-MM-DD
-
+]
     Returns
     -------
     Daily forecast containing 3-hour weather readings.

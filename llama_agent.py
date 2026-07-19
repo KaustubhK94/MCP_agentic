@@ -1,3 +1,4 @@
+# llama_agent.py
 import asyncio
 from collections import deque
 from datetime import datetime
@@ -24,8 +25,7 @@ from system_prompt import SYSTEM_PROMPT
 from travel_state import (
     get_trip,
     update_trip_fields,
-    update_result,
-)
+    update_result,)
 
 # ============================================================
 # LLM Configuration
@@ -35,13 +35,10 @@ today = datetime.now()
 
 system_prompt = SYSTEM_PROMPT.format(
     today=today.strftime("%Y-%m-%d"),
-    weekday=today.strftime("%A"),
-)
+    weekday=today.strftime("%A"),)
 
-llm = Ollama(
-    model="gemma4:e4b",
-    request_timeout=120.0,
-)
+llm = Ollama(model="gemma4:e4b",
+    request_timeout=120.0,)
 
 Settings.llm = llm
 
@@ -54,15 +51,10 @@ async def build_agent() -> FunctionAgent:
     """
     Build the MCP-backed travel planning agent.
     """
-
-    mcp_client = BasicMCPClient(
-        "http://127.0.0.1:8000/sse"
-    )
+    mcp_client = BasicMCPClient("http://127.0.0.1:8000/sse")
 
     tool_spec = McpToolSpec(client=mcp_client)
-
     tools = await tool_spec.to_tool_list_async()
-
     print("Loaded tools:")
     print([tool.metadata.name for tool in tools])
 
@@ -71,8 +63,7 @@ async def build_agent() -> FunctionAgent:
         description="Travel planning assistant powered by MCP tools.",
         tools=tools,
         llm=llm,
-        system_prompt=system_prompt,
-    )
+        system_prompt=system_prompt,)
 
 
 # ============================================================
@@ -82,14 +73,11 @@ async def build_agent() -> FunctionAgent:
 
 async def print_trip_state(
     ctx: Context,
-    title: str = "TRIP STATE",
-):
+    title: str = "TRIP STATE",):
     """
     Pretty-print the stored trip state.
     """
-
     trip = await get_trip(ctx)
-
     print(f"\n=========== {title} ===========")
     pprint(trip)
     print("=" * (24 + len(title)))
@@ -99,35 +87,24 @@ async def print_trip_state(
 # Main
 # ============================================================
 
-
 async def main():
-
     agent = await build_agent()
-
     ctx = Context(agent)
-
     # initialize state
     await get_trip(ctx)
-
     await print_trip_state(
         ctx,
-        "INITIAL TRIP",
-    )
+        "INITIAL TRIP",)
 
     while True:
-
         user_input = input("\nYou: ").strip()
-
         if user_input.lower() in {
             "quit",
-            "exit",
-        }:
+            "exit",}:
             break
-
         handler = agent.run(
             user_input,
-            ctx=ctx,
-        )
+            ctx=ctx,)
 
         #
         # Tool queries are executed sequentially.
@@ -136,7 +113,6 @@ async def main():
         # can be paired with the ToolCall that generated it.
         #
         pending_queries = deque()
-
         async for event in handler.stream_events():
 
             #
@@ -145,16 +121,11 @@ async def main():
             # -----------------------------
             #
             if isinstance(event, ToolCall):
-
                 print(f"\n🔧 Calling {event.tool_name}")
                 pprint(event.tool_kwargs)
 
-                pending_queries.append(
-                    {
-                        "tool": event.tool_name,
-                        "kwargs": event.tool_kwargs,
-                    }
-                )
+                pending_queries.append({"tool": event.tool_name,
+                        "kwargs": event.tool_kwargs,})
 
                 #
                 # Update itinerary immediately from tool arguments.
@@ -162,8 +133,7 @@ async def main():
                 await update_trip_fields(
                     ctx,
                     event.tool_name,
-                    event.tool_kwargs,
-                )
+                    event.tool_kwargs,)
 
             #
             # -----------------------------
@@ -171,37 +141,38 @@ async def main():
             # -----------------------------
             #
             elif isinstance(event, ToolCallResult):
-
                 print(f"\n✅ {event.tool_name}")
-                print(event.tool_output)
+                # print(event.tool_output)
+                print("\n===== TOOL OUTPUT TYPE =====")
+                print(type(event.tool_output))
+                print("\n===== TOOL OUTPUT VARS =====")
+                print(vars(event.tool_output))
+                if hasattr(event.tool_output, "content"):
+                    for i, item in enumerate(event.tool_output.content):
+                        print(f"\n----- Content {i} -----")
+                        print(type(item))
+                        print(vars(item))
+
 
                 if pending_queries:
-
                     tool_call = pending_queries.popleft()
-
                     query = tool_call["kwargs"]
-
                 else:
-
                     #
                     # Should never happen under sequential execution.
                     #
                     query = {}
-
                 await update_result(
                     ctx,
                     event.tool_name,
                     query,
-                    event.tool_output,
-                )
+                    event.tool_output,)
 
         #
         # Final response
         #
         response = await handler
-
         await print_trip_state(ctx)
-
         print(f"\nAgent: {response}")
 
 
