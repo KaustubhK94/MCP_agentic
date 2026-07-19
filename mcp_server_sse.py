@@ -106,39 +106,28 @@ def search_hotels(
 ) -> list:
     """
     Search hotels.
-
     Arguments
     ---------
     location
         Any geographic location supported by the hotel provider.
-
         Examples
-
         - Paris
         - Santorini
         - Tuscany
         - Greece
         - Bali
-
     check_in_date
         YYYY-MM-DD
-
     check_out_date
         YYYY-MM-DD
-
     adults
         Number of adults.
-
     Returns
     -------
     Hotel name
-
     Price
-
     Rating
-
     Address
-
      Booking link
     """
     print("Hotel tool invoked")
@@ -206,34 +195,25 @@ def fetch_sightseeing(
 ) -> list:
     """
     Search tourist attractions.
-
     Arguments
     ---------
     location
-
         Any geographic location.
-
         Examples
-
         - Paris
         - Greece
         - Santorini
         - Tuscany
         - California
         - Portofino
-
     Behaviour
     ---------
     • Call this tool once for every location mentioned by the user.
-
     • Pass the location exactly as understood from the user's request.
-
     Returns
     -------
     Name
-
     Address
-
     Rating
     """
     print("sightseeing tool invoked")
@@ -252,34 +232,24 @@ def convert_currency(
 ) -> dict:
     """
     Convert currency.
-
     Arguments
     ---------
     amount
         Positive numeric value.
-
     from_currency
         Three-letter ISO currency code.
-
     to_currency
         Three-letter ISO currency code.
-
     Examples
-
         USD
-
         INR
-
         EUR
-
         GBP
-
         JPY
 
     Returns
     -------
     Exchange rate
-
     Converted amount
     """
     print("currency tool invoked")
