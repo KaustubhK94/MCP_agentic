@@ -95,13 +95,13 @@ Each tool execution follows the pipeline below:
                             Store Tool Arguments
                                    │
                                    ▼
-                            Execute MCP Tool
+                             Execute MCP Tool
                                    │
                                    ▼
                             ToolCallResult Event
                                    │
                                    ▼
-                            Extract Structured Payload
+                         Extract Structured Payload
                                    │    
                                    ▼
                              Persist Result
