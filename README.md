@@ -39,10 +39,10 @@ persistent state that evolves throughout the conversation.
 
 
 
-                        User
+                       User
                         │
                         ▼
-                LlamaIndex FunctionAgent
+              LlamaIndex FunctionAgent
                         │
                     stream_events()
                         │
