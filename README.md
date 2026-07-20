@@ -39,26 +39,26 @@ persistent state that evolves throughout the conversation.
 
 
 
-                 User
-                  │
-                  ▼
-        LlamaIndex FunctionAgent
-                  │
-        stream_events()
-                  │
-      ┌───────────┴────────────┐
-      ▼                        ▼
- ToolCall               ToolCallResult
-      │                        │
-      ▼                        ▼
-update_trip_fields()   extract_payload()
-      │                        │
-      └───────────┬────────────┘
-                  ▼
-          Persistent Trip State
-                  │
-                  ▼
-      Future Context Retrieval
+                        User
+                        │
+                        ▼
+                LlamaIndex FunctionAgent
+                        │
+                    stream_events()
+                        │
+            ┌───────────┴────────────┐
+            ▼                        ▼
+        ToolCall               ToolCallResult
+            │                        │
+            ▼                        ▼
+     update_trip_fields()     extract_payload()
+            │                        │
+            └───────────┬────────────┘
+                        ▼
+                Persistent Trip State
+                        │
+                        ▼
+              Future Context Retrieval
 
 
 ## Context Engineering Pipeline
@@ -84,7 +84,7 @@ Each tool execution follows the pipeline below:
                     Execute MCP Tool
                            │
                            ▼
-                   ToolCallResult Event
+                    ToolCallResult Event
                            │
                            ▼
                   Extract Structured Payload
