@@ -38,27 +38,37 @@ persistent state that evolves throughout the conversation.
 - Modular travel planning architecture
 
 
-
-                       User
+```text
+                 ┌──────────────┐
+                 │     User     │
+                 └──────┬───────┘
                         │
                         ▼
-              LlamaIndex FunctionAgent
-                        │
-                    stream_events()
-                        │
-            ┌───────────┴────────────┐
-            ▼                        ▼
-        ToolCall               ToolCallResult
-            │                        │
-            ▼                        ▼
-     update_trip_fields()     extract_payload()
-            │                        │
-            └───────────┬────────────┘
-                        ▼
-                Persistent Trip State
-                        │
-                        ▼
-              Future Context Retrieval
+        ┌────────────────────────────────┐
+        │ LlamaIndex FunctionAgent       │
+        └──────────────┬─────────────────┘
+                       │
+                stream_events()
+                       │
+         ┌─────────────┴─────────────┐
+         │                           │
+         ▼                           ▼
+  ┌──────────────┐          ┌────────────────┐
+  │   ToolCall   │          │ ToolCallResult │
+  └──────┬───────┘          └───────┬────────┘
+         │                          │
+         ▼                          ▼
+ Update Trip State          Extract Payload
+         │                          │
+         └─────────────┬────────────┘
+                       ▼
+        ┌────────────────────────────────┐
+        │     Persistent Trip State      │
+        └──────────────┬─────────────────┘
+                       │
+                       ▼
+          Future Context Retrieval
+```
 
 
 ## Context Engineering Pipeline
@@ -126,22 +136,30 @@ Every tool execution stores:
 
 instead of simply returning a response to the LLM.
 
-
+```text
 travel-agent/
-│
-├── llama_agent.py          # FunctionAgent orchestration
-├── travel_state.py         # Persistent context management
-├── tool_metadata.py        # State update definitions
-├── tools/                  # MCP tool implementations
-├── server.py               # MCP server
-├── system_prompt.py
-│
-├── docs/
-│   ├── context-engineering.md
-│   ├── architecture.md
-│   └── debugging-llamaindex.md
-│
-└── README.md
+|
+|-- llama_agent.py          # Main FunctionAgent orchestration
+|-- travel_state.py         # Persistent trip state management
+|-- tool_metadata.py        # Tool-to-state mapping
+|-- system_prompt.py
+|
+|-- tools/
+|   |-- flights.py
+|   |-- hotels.py
+|   |-- weather.py
+|   |-- sightseeing.py
+|   `-- currency.py
+|
+|-- mcp_server.py
+|
+|-- docs/
+|   |-- context-engineering.md
+|   |-- architecture.md
+|   `-- debugging-llamaindex.md
+|
+`-- README.md
+```
 
 
 ## Why this project is different
@@ -161,33 +179,34 @@ we ask:
 
 That distinction is the foundation of Context Engineering.
 
-User:
-Compare flights to Bangkok and Phuket.
+### Example Workflow
 
-        ↓
+```text
+User
+  │
+  └── "Compare flights to Bangkok and Phuket"
 
-search_flights(BKK)
+Step 1
+  └── search_flights(BKK)
 
-        ↓
+Step 2
+  └── search_flights(HKT)
 
-search_flights(HKT)
+Step 3
+  └── Store both searches
 
-        ↓
+      results["flights"]
+      ├── Bangkok Search
+      └── Phuket Search
 
-results["flights"]
+Step 4
+  └── User asks:
+      "Which one was cheaper?"
 
-    ├── Bangkok Search
-    └── Phuket Search
-
-            ↓
-
-User:
-Which one was cheaper?
-
-        ↓
-
-Agent retrieves previous searches
-without executing the tools again.
+Step 5
+  └── Retrieve the stored searches
+      instead of executing the tools again.
+```
 
 
 
