@@ -43,35 +43,35 @@ persistent state that evolves throughout the conversation.
 
 
 ```text
-                 ┌──────────────┐
-                 │     User     │
-                 └──────┬───────┘
-                        │
-                        ▼
-        ┌────────────────────────────────┐
-        │ LlamaIndex FunctionAgent       │
-        └──────────────┬─────────────────┘
-                       │
-                stream_events()
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-         ▼                           ▼
-  ┌──────────────┐          ┌────────────────┐
-  │   ToolCall   │          │ ToolCallResult │
-  └──────┬───────┘          └───────┬────────┘
-         │                          │
-         ▼                          ▼
- Update Trip State          Extract Payload
-         │                          │
-         └─────────────┬────────────┘
-                       ▼
-        ┌────────────────────────────────┐
-        │     Persistent Trip State      │
-        └──────────────┬─────────────────┘
-                       │
-                       ▼
-          Future Context Retrieval
+                                   ┌──────────────┐
+                                   │     User     │
+                                   └──────┬───────┘
+                                          │
+                                          ▼
+                            ┌────────────────────────────────┐
+                            │   LlamaIndex FunctionAgent     │
+                            └──────────────┬─────────────────┘
+                                           │
+                                   stream_events()
+                                          │
+                            ┌─────────────┴─────────────┐
+                            │                           │
+                            ▼                           ▼
+                     ┌──────────────┐          ┌────────────────┐
+                     │   ToolCall   │          │ ToolCallResult │
+                     └──────┬───────┘          └───────┬────────┘
+                            │                          │
+                            ▼                          ▼
+                     Update Trip State          Extract Payload
+                            │                          │
+                            └─────────────┬────────────┘
+                                          ▼
+                            ┌────────────────────────────────┐
+                            │     Persistent Trip State      │
+                            └──────────────┬─────────────────┘
+                                           │
+                                           ▼
+                                Future Context Retrieval
 ```
 
 
@@ -82,30 +82,30 @@ every tool invocation becomes structured knowledge.
 
 Each tool execution follows the pipeline below:
 
-                    ```
-                        User Query
-                           │
-                           ▼
-                     LLM chooses a Tool
-                           │
-                           ▼
-                      ToolCall Event
-                           │
-                           ▼
-                    Store Tool Arguments
-                           │
-                           ▼
-                    Execute MCP Tool
-                           │
-                           ▼
-                    ToolCallResult Event
-                           │
-                           ▼
-                  Extract Structured Payload
-                           │    
-                           ▼
-                    Persist Result
-                    ```
+                            ```
+                               User Query
+                                   │
+                                   ▼
+                             LLM chooses a Tool
+                                   │
+                                   ▼
+                             ToolCall Event
+                                   │
+                                   ▼
+                            Store Tool Arguments
+                                   │
+                                   ▼
+                            Execute MCP Tool
+                                   │
+                                   ▼
+                            ToolCallResult Event
+                                   │
+                                   ▼
+                            Extract Structured Payload
+                                   │    
+                                   ▼
+                             Persist Result
+                            ```
 
 This enables future reasoning to retrieve historical searches instead of
 depending entirely on prompt history.
