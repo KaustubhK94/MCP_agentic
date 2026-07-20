@@ -78,7 +78,7 @@ every tool invocation becomes structured knowledge.
 
 Each tool execution follows the pipeline below:
 
-                    ```text
+                    ```
                         User Query
                            │
                            ▼
