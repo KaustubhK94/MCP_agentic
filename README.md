@@ -2,7 +2,7 @@
 
 
 
-## Cause similarity is not the same as relevance.
+## Cause similarity is not the same as relevance!
 
 > An MCP-powered travel planning agent that persistently remembers user searches,
 > separates exploration from decisions, and engineers context instead of relying
