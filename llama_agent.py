@@ -137,7 +137,7 @@ async def main():
                 print(f"\n✅ {event.tool_name}")
                 # print(event.tool_output)
                 print("\n===== TOOL OUTPUT TYPE =====")
-                print(type(event.tool_output))
+                # print(type(event.tool_output))
                 print("\n===== TOOL OUTPUT VARS =====")
                 print(vars(event.tool_output))
                 if hasattr(event.tool_output, "content"):
