@@ -232,3 +232,49 @@ process.
 - 🏗 Architecture
 - 🔍 Runtime Object Introspection
 - ⚙️ LlamaIndex Event Pipeline
+
+
+""""
+commands inspecting db from terminal 
+
+
+SQLite CLI
+
+First, locate your database (probably knowledge.db).
+
+ls
+
+You should see something like:
+
+knowledge.db
+
+Open it:
+
+sqlite3 knowledge.db
+
+Now list all tables:
+
+.tables
+
+You should see something like:
+
+tool_invocations
+
+View the schema:
+
+.schema tool_invocations
+
+View all rows:
+
+SELECT * FROM tool_invocations;
+
+A nicer formatted output:
+
+.mode column
+.headers on
+SELECT * FROM tool_invocations;
+
+Exit:
+
+.quit
+"""
