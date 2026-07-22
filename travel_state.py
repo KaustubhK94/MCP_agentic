@@ -21,6 +21,9 @@ MAX_HISTORY = 20
 # ============================================================
 
 DEFAULT_TRIP = {
+    "trip_id": None,
+    "created_at": None,
+
     "itinerary": {
         "origin": {
             "city": None,
@@ -33,19 +36,14 @@ DEFAULT_TRIP = {
         "departure": None,
         "return": None,
     },
+
     "travellers": {
         "adults": 2,
     },
+
     "budget": {
         "amount": None,
         "currency": "USD",
-    },
-    "results": {
-        "flights": [],
-        "hotels": [],
-        "weather": [],
-        "places": [],
-        "currency_conversion": [],
     },
 }
 
@@ -99,9 +97,7 @@ async def reset_trip(ctx: Context):
 def set_nested_value(obj: dict, path: tuple | list, value: Any):
     """
     Set a nested dictionary value.
-
     Example:
-
         path = ("itinerary", "origin", "airport")
     """
     current = obj
@@ -132,7 +128,6 @@ def extract_payload(tool_output):
                 payload.append(text)
         return payload
     return None
-
 
 # ============================================================
 # Trip Updates
@@ -165,39 +160,34 @@ async def update_result(
     ctx: Context,
     tool_name: str,
     query: dict,
-    tool_output: Any,):
+    tool_output: Any,
+):
     """
-    Store a tool execution.
-    Each result record contains:
-    - tool
-    - timestamp
-    - query
-    - result
+    Persist a tool execution into the knowledge store.
     """
+
     metadata = TOOL_METADATA.get(tool_name)
     if metadata is None:
         return
-    result_key = metadata.get("result_key")
-    if result_key is None:
-        return
+
     trip = await get_trip(ctx)
+
     payload = extract_payload(tool_output)
+
     print("\n===== EXTRACTED PAYLOAD =====")
     pprint(payload)
     print(type(payload))
     print("=============================\n")
-    history = trip["results"].setdefault(result_key, [])
-    history.append(
-        {
-            "tool": tool_name,
-            "timestamp": datetime.now(UTC).isoformat(),
-            "query": deepcopy(query),
-            "result": payload,})
 
-    # Keep only the latest N searches
-    if len(history) > MAX_HISTORY:
-        del history[:-MAX_HISTORY]
-    await save_trip(ctx, trip)
+    from knowledge_store import knowledge_store
+
+    knowledge_store.store_tool_result(
+        trip_id=trip["trip_id"],
+        tool_name=tool_name,
+        arguments=query,
+        payload=payload,
+    )
+
 
 
 # ============================================================
