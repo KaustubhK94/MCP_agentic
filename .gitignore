@@ -6,6 +6,9 @@ venv/
 .ipynb_checkpoints/
 .DS_Store
 
+
+knowledge.db
+
 models/
 checkpoints/
 data/
